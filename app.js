@@ -1,26 +1,24 @@
-// var index = require('./routes/index');
-// var users = require('./routes/users');
-// var pdf = require(`./routes/pdf`); // <-- add this line
-
-// app.use('/', index);
-// app.use('/users', users);
-// app.use('/pdf', pdf); // <-- add this line
 
 const express = require('express')
 const path = require('path')
-const favicon = require('serve-favicon')
+//const favicon = require('serve-favicon')
 const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
-
+const fileUpload = require('express-fileupload');
 const index = require('./routes/index')
 const users = require('./routes/users')
-//const pdf = require('./routes/pdf')
-const pdf = require('./routes/pdf2')
-const nodemailer = require('./routes/nodemailer')
+const sendMail = require('./routes/sendMail')
+require('dotenv').config();
 
 var app = express()
-const port = 3000
+app.use(fileUpload());
+
+
+const APP_PORT = process.env.PORT || 5000;
+const server = app.listen(APP_PORT, () => {
+    console.log(`App running on port ${APP_PORT}`);
+})
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
@@ -35,8 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', index)
 app.use('/users', users)
-app.use('/pdf', pdf)
-app.use('/mail', nodemailer)
+app.use('/sendMail', sendMail)
 
 
 
@@ -58,5 +55,5 @@ app.use(function (err, req, res, next) {
   res.render('error 2')
 })
 
-module.exports = app
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+module.exports = server;
+//app.listen(server, () => console.log(`Example app listening on port ${port}!`))
