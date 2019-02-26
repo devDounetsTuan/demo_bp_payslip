@@ -10,8 +10,10 @@ require("dotenv").config();
 //router.use(fileUpload());
 router.post("/", (req, res) => {
 
-    const tempFolderExcel = './xlsx/';
-    const tempFolderPdf = './pdfs/';
+   /*  const tempFolderExcel = './xlsx/';
+    const tempFolderPdf = './pdfs/'; */
+    const tempFolderExcel = path.join(__dirname, '../xlsx/');
+    const tempFolderPdf = path.join(__dirname, '../pdfs/');
 
     (async function () {
         try {
