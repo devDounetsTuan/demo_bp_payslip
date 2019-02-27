@@ -16,7 +16,7 @@ router.post("/", (req, res) => {
     var sheet_name_list = workbook.SheetNames;
     //  console.log(sheet_name_list);
     var arr_raw_data = [];
-    sheet_name_list.forEach(function(y) {
+    sheet_name_list.forEach(function (y) {
       var worksheet = workbook.Sheets[y];
       // console.log(worksheet);
       var headers = {};
@@ -52,7 +52,7 @@ router.post("/", (req, res) => {
 
     arr_edited_data_m = [];
     //console.log(ArrChange);
-    arr_raw_data.forEach(function(element) {
+    arr_raw_data.forEach(function (element) {
       //console.log("test 1");
       var arr_edited_data_ch = [];
       if (R.equals(arr_raw_data[0], element)) {
@@ -97,8 +97,7 @@ router.post("/", (req, res) => {
       for (var i = 0; i < Object.keys(element).length; i++) {
         var arr_temp_data = [];
 
-        arr_temp_data = [
-          {
+        arr_temp_data = [{
             text: "1",
             //   bold: bold3,
             // italics: italics3,
@@ -166,15 +165,13 @@ router.post("/", (req, res) => {
           contentAccessibility: true,
           documentAssembly: true
         },
-        content: [
-          {
-            style: "tableExample",
-            table: {
-              widths: [50, 300, "*"],
-              body: arr_edited_data_m[cpdf]
-            }
+        content: [{
+          style: "tableExample",
+          table: {
+            widths: [50, 300, "*"],
+            body: arr_edited_data_m[cpdf]
           }
-        ]
+        }]
       };
       var pdfDoc = printer.createPdfKitDocument(docDefinition);
       pdfDoc.pipe(
@@ -188,7 +185,7 @@ router.post("/", (req, res) => {
   function send_mail(arr_raw_data) {
     //  Send Mail
     var cmail = 0;
-    var check_mail_sended = 0;
+    var check_mail_sent = 0;
     arr_raw_data.forEach(element => {
       if (R.equals(element, arr_raw_data[0])) {
         return;
@@ -205,28 +202,30 @@ router.post("/", (req, res) => {
         from: '"Minh Tuan Nguyen" <dev.nmtuan@gmail.com>',
         to: element[Object.keys(element)[4]],
         subject: "hello",
-        attachments: [
-          {
-            filename: "Payslip.pdf",
-            path: path_folder_pdf + "document" + cmail + ".pdf",
-            content: "hello world!"
-          }
-        ]
+        attachments: [{
+          filename: "Payslip.pdf",
+          path: path_folder_pdf + "document" + cmail + ".pdf",
+          content: "hello world!"
+        }]
       };
       cmail++;
-      transporter.sendMail(mailOption, function(err, res) {
+      console.log(check_mail_sent);
+      transporter.sendMail(mailOption, function (err, res) {
         if (err) {
           console.log("Error can't send mail");
         } else {
           console.log("Email Sent");
+          //console.log(check_mail_sent);
         }
-
-        check_mail_sended++;
-
-        if (check_mail_sended == arr_raw_data.length - 1) {
+        check_mail_sent++;
+        //  console.log(check_mail_sent); //SAU
+        if (check_mail_sent == arr_raw_data.length - 1) {
           fs.readdir(path_folder_pdf, (err, files) => {
             if (err) throw err;
             for (const file of files) {
+              if (R.equals(file, ".gitignore")) {
+                continue;
+              }
               fs.unlink(path.join(path_folder_pdf, file), err => {
                 if (err) throw err;
               });
@@ -235,6 +234,9 @@ router.post("/", (req, res) => {
           fs.readdir(path_folder_excel, (err, files) => {
             if (err) throw err;
             for (const file of files) {
+              if (R.equals(file, ".gitignore")) {
+                continue;
+              }
               fs.unlink(path.join(path_folder_excel, file), err => {
                 if (err) throw err;
               });
@@ -245,19 +247,15 @@ router.post("/", (req, res) => {
     });
   }
 
-  (async function() {
+  (async function () {
     try {
       let path_file = req.files.path_file;
       console.log("test1");
       await path_file.mv(path_folder_excel + path_file.name);
-      console.log("test2");
       //Read excel file
       let excel_data = readExcel(path_file);
-      console.log("test3");
       edit_data(excel_data);
-      console.log("test4");
       generate_pdf(excel_data, edit_data(excel_data));
-      console.log("test5");
       send_mail(excel_data);
     } catch (error) {
       return res.status(500).send("Error processing files.");
