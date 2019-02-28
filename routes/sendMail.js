@@ -5,46 +5,56 @@ const nodemailer = require("nodemailer");
 path = require("path");
 var fs = require("fs");
 require("dotenv").config();
+const pdfMake = require("pdfmake");
 
 router.post("/", (req, res) => {
   const path_folder_excel = path.join(__dirname, "../xlsx/");
   const path_folder_pdf = path.join(__dirname, "../pdfs/");
 
   function readExcel(path_file) {
-    var XLSX = require("xlsx");
-    var workbook = XLSX.readFile(path_folder_excel + path_file.name);
-    var sheet_name_list = workbook.SheetNames;
-    //  console.log(sheet_name_list);
-    var arr_raw_data = [];
-    sheet_name_list.forEach(function (y) {
-      var worksheet = workbook.Sheets[y];
-      // console.log(worksheet);
-      var headers = {};
-      var data = [];
-      for (z in worksheet) {
-        if (z[0] === "!") continue;
+    try {
 
-        var col = z.substring(0, 1);
-        var row = parseInt(z.substring(1));
-        var value = worksheet[z].v;
+      clean_folder_xlsx();
 
-        if (row == 1) {
-          headers[col] = value;
-          continue;
+      var xlsx = require("xlsx");
+      var workbook = xlsx.readFile(path_folder_excel + path_file.name);
+      var sheet_name_list = workbook.SheetNames;
+      //  console.log(sheet_name_list);
+      var arr_raw_data = [];
+      sheet_name_list.forEach(function (y) {
+        var worksheet = workbook.Sheets[y];
+        // console.log(worksheet);
+        var headers = {};
+        var data = [];
+        for (z in worksheet) {
+          if (z[0] === "!") continue;
+
+          var col = z.substring(0, 1);
+          var row = parseInt(z.substring(1));
+          var value = worksheet[z].v;
+
+          if (row == 1) {
+            headers[col] = value;
+            continue;
+          }
+          if (!data[row]) data[row] = {};
+          data[row][headers[col]] = value;
         }
-        if (!data[row]) data[row] = {};
-        data[row][headers[col]] = value;
-      }
-      data.shift();
-      data.shift();
+        data.shift();
+        data.shift();
 
-      // console.log(data);
-      arr_raw_data = data;
-    });
-    return arr_raw_data;
-
+        arr_raw_data = data;
+      });
     //  console.log(arr_raw_data);
+      return arr_raw_data;
+    } catch (error) {
+      console.log("Error can't read excel file: " + error);
+    }
+
   }
+
+
+
 
   function edit_data(arr_raw_data) {
     var num1 = ["I", "II", "III"];
@@ -132,55 +142,64 @@ router.post("/", (req, res) => {
     return arr_edited_data_m;
   }
 
+
+
+ 
   function generate_pdf(arr_raw_data, arr_edited_data_m) {
     //Create PDF
-    var fonts = {
-      Roboto: {
-        normal: "fonts/Roboto-Regular.ttf",
-        bold: "fonts/Roboto-Medium.ttf",
-        italics: "fonts/Roboto-Italic.ttf",
-        bolditalics: "fonts/Roboto-MediumItalic.ttf"
-      }
-    };
+    try {
 
-    const pdfMake = require("pdfmake");
-    var printer = new pdfMake(fonts);
-
-    var cpdf = 0;
-    arr_raw_data.forEach(element => {
-      if (R.equals(element, arr_raw_data[0])) {
-        return;
-      }
-
-      var docDefinition = {
-        userPassword: "123",
-        ownerPassword: element[Object.keys(element)[5]],
-
-        permissions: {
-          printing: "highResolution", //'lowResolution'
-          modifying: false,
-          copying: false,
-          annotating: true,
-          fillingForms: true,
-          contentAccessibility: true,
-          documentAssembly: true
-        },
-        content: [{
-          style: "tableExample",
-          table: {
-            widths: [50, 300, "*"],
-            body: arr_edited_data_m[cpdf]
-          }
-        }]
+      clean_folder_pdfs();
+      
+      var fonts = {
+        Roboto: {
+          normal: "fonts/Roboto-Regular.ttf",
+          bold: "fonts/Roboto-Medium.ttf",
+          italics: "fonts/Roboto-Italic.ttf",
+          bolditalics: "fonts/Roboto-MediumItalic.ttf"
+        }
       };
-      var pdfDoc = printer.createPdfKitDocument(docDefinition);
-      pdfDoc.pipe(
-        fs.createWriteStream(path_folder_pdf + "document" + cpdf + ".pdf")
-      );
-      cpdf++;
-      pdfDoc.end();
-    });
+      var printer = new pdfMake(fonts);
+      var cpdf = 0;
+      arr_raw_data.forEach(element => {
+        if (R.equals(element, arr_raw_data[0])) {
+          return;
+        }
+
+        var docDefinition = {
+          userPassword: "admin",
+          ownerPassword: element[Object.keys(element)[5]],
+
+          permissions: {
+            printing: "highResolution", //'lowResolution'
+            modifying: false,
+            copying: false,
+            annotating: true,
+            fillingForms: true,
+            contentAccessibility: true,
+            documentAssembly: true
+          },
+          content: [{
+            style: "tableExample",
+            table: {
+              widths: [50, 300, "*"],
+              body: arr_edited_data_m[cpdf]
+            }
+          }]
+        };
+        var pdfDoc = printer.createPdfKitDocument(docDefinition);
+        pdfDoc.pipe(fs.createWriteStream(path_folder_pdf + "document" + cpdf + ".pdf"));
+        cpdf++;
+        pdfDoc.end();
+      });
+
+    } catch (error) {
+      console.log("Error can't create pdf file: " + error);
+    }
   }
+
+
+  
 
   function send_mail(arr_raw_data) {
     //  Send Mail
@@ -209,53 +228,67 @@ router.post("/", (req, res) => {
         }]
       };
       cmail++;
-      console.log(check_mail_sent);
+      // console.log(check_mail_sent);
       transporter.sendMail(mailOption, function (err, res) {
         if (err) {
           console.log("Error can't send mail");
         } else {
           console.log("Email Sent");
-          //console.log(check_mail_sent);
         }
         check_mail_sent++;
-        //  console.log(check_mail_sent); //SAU
         if (check_mail_sent == arr_raw_data.length - 1) {
-          fs.readdir(path_folder_pdf, (err, files) => {
-            if (err) throw err;
-            for (const file of files) {
-              if (R.equals(file, ".gitignore")) {
-                continue;
-              }
-              fs.unlink(path.join(path_folder_pdf, file), err => {
-                if (err) throw err;
-              });
-            }
-          });
-          fs.readdir(path_folder_excel, (err, files) => {
-            if (err) throw err;
-            for (const file of files) {
-              if (R.equals(file, ".gitignore")) {
-                continue;
-              }
-              fs.unlink(path.join(path_folder_excel, file), err => {
-                if (err) throw err;
-              });
-            }
-          });
+          clean_folder_xlsx()
+          clean_folder_pdfs();
         }
       });
     });
   }
 
+  function clean_folder_xlsx() {
+    fs.readdir(path_folder_excel, (err, files) => {
+      if (err) throw err;
+      for (const file of files) {
+        if (R.equals(file, ".gitignore")) {
+          continue;
+        }
+        fs.unlink(path.join(path_folder_excel, file), err => {
+          if (err) throw err;
+        });
+      }
+    });
+  }
+
+  function clean_folder_pdfs() {
+    fs.readdir(path_folder_pdf, (err, files) => {
+      if (err) throw err;
+      for (const file of files) {
+        if (R.equals(file, ".gitignore")) {
+          continue;
+        }
+        fs.unlink(path.join(path_folder_pdf, file), err => {
+          if (err) throw err;
+        });
+      }
+    });
+  }
+
+
   (async function () {
     try {
+      //Upload excel file
       let path_file = req.files.path_file;
-      console.log("test1");
-      await path_file.mv(path_folder_excel + path_file.name);
+      try {
+        await path_file.mv((path_folder_excel + path_file.name));
+      } catch (error) {
+        console.log("Error can't upload excel file");
+      }
       //Read excel file
       let excel_data = readExcel(path_file);
+      //edit data
       edit_data(excel_data);
+      //Create pdf file
       generate_pdf(excel_data, edit_data(excel_data));
+      //send mail
       send_mail(excel_data);
     } catch (error) {
       return res.status(500).send("Error processing files.");
