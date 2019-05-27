@@ -3,16 +3,16 @@ block content
   .row
     .col-md-8
       h1="Send Email"
-      form.form-horizontal.well(method="post", action="/sendMail" encType="multipart/form-data")
-          .form-group
-              label.col-md-2.control-label File Name
-              .col-md-6
-                .input-group
-                  input.form-control(type="file",accept=".xls,.xlsx" name="path_file", placeholder="File Name")
-                
-        select(name='dropDown', id='')
-         each val in ['red' , 'green' , 'blue']
-          option=val
-          .form-group
-              .col-sm-offset-2.col-sm-10
-                input.btn.btn-default(type="submit", value="Send Email")
+      form.form-horizontal.well(method="post", action="/" encType="multipart/form-data")
+        .form-group
+          label.col-md-2.control-label File Name
+          .col-md-6
+            .input-group
+              input.form-control(type="file",accept=".xls,.xlsx" name="path_file", placeholder="File Name")
+              select(name='dropDown', id='' onchange="this.form.submit()")
+                    each val in ['red' , 'green' , 'blue']
+                        option(value=(val)) #{val}
+        .form-group
+          .col-sm-offset-2.col-sm-10
+              input.btn.btn-default(type="submit", value="Send Email" onclick="javascript: form.action='/sendMail';")
+              input.btn.btn-default(type="submit", value="Create" onclick="javascript: form.action='/template';")

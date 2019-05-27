@@ -1,0 +1,23 @@
+extends layout
+block content
+  .row
+    .col-md-8
+      h1="Create Template"
+      form.form-horizontal.well(method="post", action="/" encType="multipart/form-data")
+        .form-group
+          table.table.table-borderless
+            thead.thead-dark
+              tr
+                th A
+                th B
+            tbody
+              each item in ['red' , 'green' , 'blue']
+                tr
+                  td=1
+                  td 
+                    select(name='dropDown', id='')
+                      each val in array
+                        option(value=(val)) #{val}
+        .form-group
+          .col-sm-offset-2.col-sm-10
+            input.btn.btn-default(type="submit", value="Send Email" onclick="javascript: form.action='/sendMail';")
