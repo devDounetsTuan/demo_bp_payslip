@@ -10,6 +10,7 @@ const index = require('./routes/index')
 const users = require('./routes/users')
 const sendMail = require('./routes/sendMail')
 const template = require('./routes/template')
+const createtemplate = require('./routes/createTemplate');
 require('dotenv').config();
 
 var app = express()
@@ -41,6 +42,7 @@ app.use('/', index)
 app.use('/users', users)
 app.use('/sendMail', sendMail)
 app.use('/template', template)
+app.use('/createtemplate',createtemplate)
 
 
 // catch 404 and forward to error handler

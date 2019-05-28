@@ -8,8 +8,8 @@ block content
           label.col-md-2.control-label File Name
           .col-md-6
             .input-group
-              input.form-control(type="file",accept=".xls,.xlsx" name="path_file", placeholder="File Name")
-              select(name='dropDown', id='' onchange="this.form.submit()")
+              input.form-control(type="file",accept=".xls,.xlsx" name="path_file", placeholder="File Name" onchange="this.form.submit()")
+              select(name='dropDown', id='')
                     each val in ['red' , 'green' , 'blue']
                         option(value=(val)) #{val}
         .form-group

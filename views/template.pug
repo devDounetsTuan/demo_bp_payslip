@@ -11,13 +11,13 @@ block content
                 th A
                 th B
             tbody
-              each item in ['red' , 'green' , 'blue']
+              each item in ['C01' , 'C02' , 'C03','C04','C05']
                 tr
-                  td=1
+                  td=item              
                   td 
-                    select(name='dropDown', id='')
+                    select(name=item, id='')
                       each val in array
                         option(value=(val)) #{val}
         .form-group
           .col-sm-offset-2.col-sm-10
-            input.btn.btn-default(type="submit", value="Send Email" onclick="javascript: form.action='/sendMail';")
+            input.btn.btn-default(type="submit", value="Create Template" onclick="javascript: form.action='/createtemplate';")

@@ -5,7 +5,7 @@ let jsonData = {}
 
 router.post('/', function (req, res, next) {
   jsonData = fs.readFileSync('./dataconfig/columnList.json', 'utf-8')
-  console.log(JSON.parse(jsonData));
+  //console.log(JSON.parse(jsonData));
   res.render('template',{array:JSON.parse(jsonData)} );
   })
   
