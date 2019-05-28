@@ -5,14 +5,25 @@ block content
       h1="Send Email"
       form.form-horizontal.well(method="post", action="/" encType="multipart/form-data")
         .form-group
+          label.col-md-2.control-label Template
+          .col-md-6
+            .input-group         
+              select(name='template', id='')
+                each val in tempList
+                  option(value=(val.template)) #{val.template}
+        .form-group
+          .col-sm-offset-2.col-sm-10 
+              input.btn.btn-default(type="submit", value="Create" onclick="javascript: form.action='/template';")
+        .form-group
           label.col-md-2.control-label File Name
           .col-md-6
             .input-group
-              input.form-control(type="file",accept=".xls,.xlsx" name="path_file", placeholder="File Name" onchange="this.form.submit()")
-              select(name='dropDown', id='')
-                    each val in ['red' , 'green' , 'blue']
-                        option(value=(val)) #{val}
+              input.form-control(type="file",accept=".xls,.xlsx" name="path_file", placeholder="File Name" )
         .form-group
           .col-sm-offset-2.col-sm-10
-              input.btn.btn-default(type="submit", value="Send Email" onclick="javascript: form.action='/sendMail';")
-              input.btn.btn-default(type="submit", value="Create" onclick="javascript: form.action='/template';")
+            input.btn.btn-default(type="submit", value="Send Email" onclick="javascript: form.action='/sendMail';")
+    
+        
+         
+
+    

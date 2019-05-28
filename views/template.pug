@@ -5,17 +5,18 @@ block content
       h1="Create Template"
       form.form-horizontal.well(method="post", action="/" encType="multipart/form-data")
         .form-group
+          input.form-control(type="text",accept=".xls,.xlsx" name="template", placeholder="File Name" )
           table.table.table-borderless
             thead.thead-dark
               tr
                 th A
                 th B
             tbody
-              each item in ['C01' , 'C02' , 'C03','C04','C05']
+              each item,index in array
                 tr
-                  td=item              
+                  td=index          
                   td 
-                    select(name=item, id='')
+                    select(name=index, id='')
                       each val in array
                         option(value=(val)) #{val}
         .form-group

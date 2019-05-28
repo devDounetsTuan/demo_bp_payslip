@@ -6,6 +6,7 @@ path = require("path");
 var fs = require("fs");
 require("dotenv").config();
 const pdfMake = require("pdfmake");
+let jsonData = {};
 
 router.post("/", (req, res) => {
   const path_folder_excel = path.join(__dirname, "../xlsx/");
@@ -21,6 +22,9 @@ router.post("/", (req, res) => {
       var sheet_name_list = workbook.SheetNames;
       //  console.log(sheet_name_list);
       var arr_raw_data = [];
+      var arr_temp_data = [];
+
+
       sheet_name_list.forEach(function (y) {
         var worksheet = workbook.Sheets[y];
         // console.log(worksheet);
@@ -45,16 +49,30 @@ router.post("/", (req, res) => {
 
         arr_raw_data = data;
       });
-    //  console.log(arr_raw_data);
+           
+      jsonData = fs.readFileSync('./dataconfig/templateList.json', 'utf-8');
+      let tempData = R.find(R.propEq('template', req.body.template))(JSON.parse(jsonData));
+      arr_temp_data =  arr_raw_data.map((item,index)=>{
+        var tempObj = {}
+           for (let i in Object.values(tempData)) {  
+            if(Object.keys(item).includes(i)){
+              return tempObj(i) = item(i);
+            }
+          }
+      })
+
+      console.log(arr_temp_data);
+       
+      
+     // console.log(tempData);
+     // console.log(req.body.template);
+     // console.log(arr_raw_data);
       return arr_raw_data;
     } catch (error) {
       console.log("Error can't read excel file: " + error);
     }
 
   }
-
-
-
 
   function edit_data(arr_raw_data) {
     var num1 = ["I", "II", "III"];
@@ -68,6 +86,7 @@ router.post("/", (req, res) => {
       if (R.equals(arr_raw_data[0], element)) {
         return;
       }
+
       // if (R.equals(ArrBefor[0], element)) {
       //     // bold1 = true;
       //     // bold2 = true;
@@ -139,6 +158,7 @@ router.post("/", (req, res) => {
         R.append(arr_edited_data_ch, [])
       );
     });
+    
     return arr_edited_data_m;
   }
 
