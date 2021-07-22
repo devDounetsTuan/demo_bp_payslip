@@ -24,7 +24,7 @@
     "pdfmake": "^0.1.53",
     "pug": "^2.0.3",
     "ramda": "^0.26.1",
-    "xlsx": "^0.14.1"
+    "xlsx": "^0.17.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"
